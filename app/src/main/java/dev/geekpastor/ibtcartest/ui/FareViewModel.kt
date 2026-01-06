@@ -22,6 +22,10 @@ class FareViewModel @Inject constructor(
 
     private var currentDraft = initialDraft()
 
+    init {
+        recompute()
+    }
+
     fun recompute() {
         viewModelScope.launch {
             _state.value = FareUiState.Loading
