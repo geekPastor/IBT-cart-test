@@ -25,20 +25,34 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dev.geekpastor.ibtcartest.core.domain.Money
 import dev.geekpastor.ibtcartest.core.domain.model.FareEstimate
 
+/**
+ * Écran principal du calcul de tarif.
+ *
+ * Rôle :
+ * - Observer l'état exposé par le ViewModel
+ * - Afficher la vue correspondante (Loading / Error / Content)
+ *
+ * Cet écran ne contient AUCUNE logique métier.
+ * Il se contente de réagir à l'état.
+ */
 @Composable
 fun FareScreen(
     viewModel: FareViewModel = hiltViewModel()
 ) {
+    // Collecte de l'état du ViewModel
     val uiState by viewModel.state.collectAsState()
 
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
         when (uiState) {
+
+            // ---------------- Loading ----------------
             is FareUiState.Loading -> {
                 LoadingView()
             }
 
+            // ---------------- Error ----------------
             is FareUiState.Error -> {
                 ErrorView(
                     message = (uiState as FareUiState.Error).message,
@@ -46,20 +60,28 @@ fun FareScreen(
                 )
             }
 
+            // ---------------- Content ----------------
             is FareUiState.Content -> {
                 FareContent(
                     estimate = (uiState as FareUiState.Content).estimate,
-                    onAddStop = { viewModel.addStop() },
-                    onRemoveStop = { viewModel.removeStop() },
-                    onChangeDestination = { viewModel.changeDestination() }
+                    onAddStop = viewModel::addStop,
+                    onRemoveStop = viewModel::removeStop,
+                    onChangeDestination = viewModel::changeDestination
                 )
             }
         }
     }
 }
 
+//
+// ─────────────────────────────────────────────
+// Loading
+// ─────────────────────────────────────────────
+//
 
-//loader to show when loading
+/**
+ * Vue affichée pendant le chargement ou le recalcul du tarif.
+ */
 @Composable
 fun LoadingView() {
     Box(
@@ -70,8 +92,18 @@ fun LoadingView() {
     }
 }
 
+//
+// ─────────────────────────────────────────────
+// Error
+// ─────────────────────────────────────────────
+//
 
-//error view to show when an error occurs
+/**
+ * Vue affichée lorsqu'une erreur survient lors du calcul du tarif.
+ *
+ * @param message Message d'erreur à afficher
+ * @param onRetry Action déclenchée lors du clic sur "Réessayer"
+ */
 @Composable
 fun ErrorView(
     message: String,
@@ -84,6 +116,7 @@ fun ErrorView(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
             text = "Une erreur est survenue",
             style = MaterialTheme.typography.titleMedium
@@ -104,8 +137,20 @@ fun ErrorView(
     }
 }
 
+//
+// ─────────────────────────────────────────────
+// Content
+// ─────────────────────────────────────────────
+//
 
-//content to show when the fare is computed
+/**
+ * Vue principale affichée lorsque le tarif a été calculé avec succès.
+ *
+ * @param estimate Résultat du calcul de tarif
+ * @param onAddStop Ajout d'un arrêt intermédiaire
+ * @param onRemoveStop Suppression du dernier arrêt
+ * @param onChangeDestination Modification de la destination
+ */
 @Composable
 fun FareContent(
     estimate: FareEstimate,
@@ -119,7 +164,7 @@ fun FareContent(
             .padding(16.dp)
     ) {
 
-        // --------- Trip Info (mock) ----------
+        // ---------- Informations sur le trajet ----------
         Text(
             text = "Trajet",
             style = MaterialTheme.typography.titleLarge
@@ -127,33 +172,34 @@ fun FareContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Pickup: Position actuelle")
-        Text("Dropoff: Destination sélectionnée")
+        // Ces valeurs sont simulées dans ce test
+        Text("Pickup : Position actuelle")
+        Text("Dropoff : Destination sélectionnée")
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --------- Actions ----------
+        // ---------- Actions utilisateur ----------
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(onClick = onAddStop) {
-                Text("➕ Ajouter un arrêt")
+                Text("Ajouter un arrêt")
             }
 
             Button(onClick = onRemoveStop) {
-                Text("➖ Retirer un arrêt")
+                Text("Retirer un arrêt")
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = onChangeDestination) {
-            Text("🔁 Changer la destination")
+            Text("Changer la destination")
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --------- Fare Breakdown ----------
+        // ---------- Détail du tarif ----------
         Text(
             text = "Détail du tarif",
             style = MaterialTheme.typography.titleMedium
@@ -176,8 +222,19 @@ fun FareContent(
     }
 }
 
-//reusable line
+//
+// ─────────────────────────────────────────────
+// Composant réutilisable
+// ─────────────────────────────────────────────
+//
 
+/**
+ * Ligne réutilisable pour afficher un élément du tarif.
+ *
+ * @param label Libellé (ex: Distance, Durée, TOTAL)
+ * @param money Montant associé
+ * @param isTotal Indique si la ligne représente le total
+ */
 @Composable
 fun FareRow(
     label: String,
@@ -188,6 +245,7 @@ fun FareRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
+
         Text(
             text = label,
             style = if (isTotal)
@@ -209,4 +267,3 @@ fun FareRow(
         )
     }
 }
-
