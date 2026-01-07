@@ -179,6 +179,7 @@ Les tests sont écrits sans dépendance Android, ce qui les rend :
 ## 👤 Auteur
 
 Projet réalisé par **MUKEBA MUKEBA Chrinovic (The Geek Pastor)**
+
 Android Developer
 
 ---
